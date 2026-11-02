@@ -1,0 +1,287 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  RECRUITER
+  CLIENT
+}
+
+enum RequisitionStatus {
+  DRAFT
+  OPEN
+  CLOSED
+}
+
+enum ParseStatus {
+  PENDING
+  PROCESSING
+  PARSED
+  NEEDS_REVIEW
+  FAILED
+  QUEUED
+}
+
+enum Stage {
+  SOURCED
+  SCREENED
+  SHORTLISTED
+  SUBMITTED
+  CLIENT_REVIEW
+  INTERVIEW
+  OFFERED
+  JOINED
+  REJECTED
+}
+
+enum ConsentStatus {
+  GIVEN
+  PENDING
+  WITHDRAWN
+}
+
+enum ConsentSource {
+  RECRUITER_ATTESTATION
+  CANDIDATE_PORTAL
+  IMPORT
+}
+
+enum ClientDecision {
+  PENDING
+  SHORTLISTED
+  REJECTED
+  INTERVIEW_PROPOSED
+}
+
+enum CriterionType {
+  SKILL
+  EXPERIENCE
+  NOTICE
+  LOCATION
+  CTC
+  CUSTOM
+}
+
+enum DuplicateStatus {
+  NONE
+  POSSIBLE
+  CONFIRMED
+  IGNORED
+}
+
+enum AuditAction {
+  REQUISITION_CREATED
+  SCORECARD_UPDATED
+  CV_UPLOADED
+  CV_VIEWED
+  PROFILE_EDITED
+  SCORE_RERUN
+  STAGE_CHANGED
+  SUBMITTED
+  CLIENT_VIEWED
+  CLIENT_SHORTLISTED
+  CLIENT_REJECTED
+  SLOT_PROPOSED
+  CONSENT_UPDATED
+  DELETION_REQUESTED
+  CANDIDATE_DELETED
+}
+
+enum AiRunStatus {
+  SUCCESS
+  INVALID_JSON
+  TIMEOUT
+  RATE_LIMITED
+  ERROR
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  passwordHash String
+  name         String
+  role         Role
+  clientId     String?
+  client       Client?       @relation(fields: [clientId], references: [id])
+  createdAt    DateTime      @default(now())
+  auditLogs    AuditLog[]
+  requisitions Requisition[]
+}
+
+model Client {
+  id           String        @id @default(cuid())
+  name         String
+  domain       String
+  users        User[]
+  requisitions Requisition[]
+  createdAt    DateTime      @default(now())
+}
+
+model Requisition {
+  id            String               @id @default(cuid())
+  clientId      String
+  createdById   String
+  title         String
+  jdText        String
+  location      String
+  minExpYears   Int
+  maxExpYears   Int
+  noticeMaxDays Int
+  ctcMaxLpa     Float?
+  status        RequisitionStatus    @default(OPEN)
+  client        Client               @relation(fields: [clientId], references: [id])
+  createdBy     User                 @relation(fields: [createdById], references: [id])
+  criteria      ScorecardCriterion[]
+  applications  Application[]
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  @@index([clientId, status])
+}
+
+model ScorecardCriterion {
+  id            String           @id @default(cuid())
+  requisitionId String
+  label         String
+  type          CriterionType
+  weight        Int
+  mustHave      Boolean          @default(true)
+  expectedValue String?
+  order         Int              @default(0)
+  requisition   Requisition      @relation(fields: [requisitionId], references: [id], onDelete: Cascade)
+  scores        CriterionScore[]
+
+  @@index([requisitionId])
+}
+
+model Candidate {
+  id               String            @id @default(cuid())
+  fullName         String
+  email            String
+  phone            String
+  location         String
+  consentStatus    ConsentStatus     @default(GIVEN)
+  consentSource    ConsentSource     @default(RECRUITER_ATTESTATION)
+  consentAt        DateTime          @default(now())
+  consentVersion   String            @default("v1")
+  consentNote      String?
+  deletedAt        DateTime?
+  anonymizedAt     DateTime?
+  applications     Application[]
+  deletionRequests DeletionRequest[]
+  createdAt        DateTime          @default(now())
+
+  @@index([email])
+  @@index([phone])
+}
+
+model Application {
+  id              String           @id @default(cuid())
+  requisitionId   String
+  candidateId     String
+  resumeBlobKey   String
+  resumeFileName  String
+  resumeMime      String
+  resumeText      String?
+  parsedProfile   Json?
+  parseStatus     ParseStatus      @default(PENDING)
+  parseReasons    Json?
+  parseConfidence Float?
+  overallScore    Float?
+  stage           Stage            @default(SOURCED)
+  duplicateStatus DuplicateStatus  @default(NONE)
+  duplicateOfId   String?
+  duplicateOf     Application?     @relation("Duplicate", fields: [duplicateOfId], references: [id])
+  duplicates      Application[]    @relation("Duplicate")
+  fileHash        String
+  textHash        String?
+  viewedAt        DateTime?
+  clientViewedAt  DateTime?
+  submittedAt     DateTime?
+  clientDecision  ClientDecision   @default(PENDING)
+  clientReason    String?
+  clientNote      String?
+  proposedSlots   Json?
+  recruiterNotes  String?
+  stageChangedAt  DateTime         @default(now())
+  requisition     Requisition      @relation(fields: [requisitionId], references: [id], onDelete: Cascade)
+  candidate       Candidate        @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  criterionScores CriterionScore[]
+  aiRuns          AiRun[]
+  file            ResumeFile?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@unique([requisitionId, candidateId])
+  @@index([requisitionId, overallScore])
+  @@index([requisitionId, stage])
+  @@index([candidateId])
+}
+
+/// Private resume bytes. Demo storage when no object store is configured (see BUILD_LOG D4).
+model ResumeFile {
+  applicationId String      @id
+  bytes         Bytes
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
+
+model CriterionScore {
+  id            String             @id @default(cuid())
+  applicationId String
+  criterionId   String
+  score         Float
+  evidenceQuote String?
+  evidencePage  Int?
+  confidence    Float
+  grounded      Boolean            @default(false)
+  application   Application        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  criterion     ScorecardCriterion @relation(fields: [criterionId], references: [id], onDelete: Cascade)
+
+  @@unique([applicationId, criterionId])
+}
+
+model AiRun {
+  id            String       @id @default(cuid())
+  applicationId String?
+  provider      String       @default("groq")
+  model         String
+  promptVersion String
+  latencyMs     Int
+  tokensIn      Int?
+  tokensOut     Int?
+  status        AiRunStatus
+  error         String?
+  application   Application? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  createdAt     DateTime     @default(now())
+}
+
+model AuditLog {
+  id         String      @id @default(cuid())
+  actorId    String?
+  action     AuditAction
+  entityType String
+  entityId   String
+  meta       Json?
+  actor      User?       @relation(fields: [actorId], references: [id])
+  createdAt  DateTime    @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorId, createdAt])
+}
+
+model DeletionRequest {
+  id            String    @id @default(cuid())
+  candidateId   String
+  requestedById String?
+  status        String    @default("REQUESTED")
+  note          String?
+  processedAt   DateTime?
+  candidate     Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+}
