@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "samples": "tsx scripts/generate-resumes.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

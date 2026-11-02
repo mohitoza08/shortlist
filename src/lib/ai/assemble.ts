@@ -66,10 +66,6 @@ export function assemble(
         score = grounded ? Math.round(item?.score ?? 0) : 0;
       } else if (grounded) {
         score = item?.related && !item.found ? 50 : 100;
-      } else {
-        const sm = skillMatch(c.label, x.skills);
-        score = 0;
-        if (sm === 50 && item?.related) score = 0;
       }
       if (!grounded && claimed) reasons.push(`Could not verify evidence for “${c.label}”`);
       if (!grounded && !claimed) raw = Math.max(raw, 0.6); // a confident "not found" is not a failure
@@ -100,10 +96,7 @@ export function assemble(
             : profile.expectedCtcLpa != null;
     const grounded = isGrounded(quote, resumeText);
     if (stated && !grounded) reasons.push(`Could not verify a line for “${c.label}”`);
-    if (!stated) {
-      raw = 0.3;
-      if (c.type !== "CTC") reasons.push(`${c.label}: not stated in the CV`);
-    }
+    if (!stated) raw = 0.3; // not stated is scored neutrally and shown as low confidence, not as a failure
     // Unstated values are scored neutrally, not as a quote failure.
     const conf = adjustConfidence({ raw, grounded, quote, lowQuality, requiresQuote: stated });
     rows.push({ criterionId: c.id, score, evidenceQuote: grounded ? quote : null, grounded, confidence: conf });

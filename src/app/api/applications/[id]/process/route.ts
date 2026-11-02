@@ -1,0 +1,13 @@
+import { processApplication } from "@/lib/ai/pipeline";
+import { ApiError, handler, requireRecruiter } from "@/lib/rbac";
+import { db } from "@/lib/db";
+
+export const maxDuration = 60;
+
+export const POST = handler(async (_req: Request, ctx: { params: Promise<{ id: string }> }) => {
+  const user = await requireRecruiter();
+  const { id } = await ctx.params;
+  const exists = await db.application.findUnique({ where: { id }, select: { id: true } });
+  if (!exists) throw new ApiError(404, "NOT_FOUND", "Not found.");
+  return Response.json(await processApplication(id, user.id));
+});
