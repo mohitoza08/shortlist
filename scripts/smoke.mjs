@@ -112,3 +112,57 @@ await login("hiring@ashfordbank.example");
 const own = await json(await req(`/api/applications/${ritika}`));
 ok(own.maskedEmail && !JSON.stringify(own).includes("@example.com"), `owning client sees masked contact only (${own.maskedEmail})`);
 console.log(process.exitCode ? "\nSOME CHECKS FAILED" : "\nALL CHECKS PASSED");
+
+// ---- Day 5-6: pipeline, portal, consent, deletion ----
+await login("recruiter@meridian.example");
+const R2 = await json(await req("/api/requisitions", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
+  clientId, title: `Smoke2 ${Date.now()}`, jdText: "x", location: "Noida", minExpYears: 5, maxExpYears: 8, noticeMaxDays: 60, ctcMaxLpa: 28, criteria: ext.criteria }) }));
+const up = async (f) => {
+  const fd = new FormData(); fd.append("consent", "true"); fd.append("file", new Blob([fs.readFileSync(path.join(dir, f))]), f);
+  return (await json(await req(`/api/requisitions/${R2.id}/applications`, { method: "POST", body: fd }))).applicationId;
+};
+const [a1, a2, a3] = [await up("ritika-bansal.pdf"), await up("dev-malhotra.pdf"), await up("naina-gupta.docx")];
+for (const id of [a1, a2, a3]) await req(`/api/applications/${id}/process`, { method: "POST" });
+
+const mv = (id, stage) => req(`/api/applications/${id}/stage`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ stage }) });
+ok((await mv(a1, "INTERVIEW")).status === 400, "cannot jump to Interview without opening the CV");
+await req(`/api/applications/${a1}/view`, { method: "POST" });
+await req(`/api/applications/${a2}/view`, { method: "POST" });
+ok((await mv(a1, "SHORTLISTED")).status === 200, "move to Shortlisted after viewing");
+ok((await mv(a1, "REJECTED")).status === 400, "rejecting via stage route is refused (needs a reason)");
+ok((await req(`/api/applications/${a1}/submit`, { method: "POST" })).status === 200, "submit a1");
+ok((await req(`/api/applications/${a2}/submit`, { method: "POST" })).status === 200, "submit a2");
+const rj = await req(`/api/applications/${a3}/reject`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ reason: "Skills mismatch" }) });
+ok(rj.status === 200, "recruiter reject with reason");
+
+await req(`/api/applications/${a3}/view`, { method: "POST" });
+const cand3 = (await json(await req(`/api/applications/${a3}`))).candidateId;
+ok((await req(`/api/candidates/${cand3}/consent`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: "WITHDRAWN" }) })).status === 400, "withdrawal needs a note");
+ok((await req(`/api/candidates/${cand3}/consent`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: "WITHDRAWN", note: "emailed" }) })).status === 200, "consent withdrawn");
+ok((await req(`/api/applications/${a3}/submit`, { method: "POST" })).status === 400, "withdrawn candidate cannot be submitted");
+
+await login("hiring@ashfordbank.example");
+const home = await (await req("/portal")).text();
+ok(home.includes("Smoke2"), "portal lists the shared requisition");
+const rev = await (await req(`/portal/${R2.id}`)).text();
+ok(rev.includes("Ritika") && !rev.includes("Naina"), "portal shows only submitted candidates");
+ok(!/ritika\.bansal@example\.com/i.test(rev) && /r•••@e•••\.com/.test(rev), "portal HTML has masked contact only");
+const dec = (id, b) => req(`/api/portal/applications/${id}/decision`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) });
+ok((await dec(a3, { decision: "SHORTLIST" })).status === 404, "client cannot act on an unsubmitted candidate (404)");
+ok((await dec(a1, { decision: "REJECT" })).status === 400, "reject requires a reason");
+ok((await dec(a1, { decision: "SHORTLIST" })).status === 200, "client shortlists");
+ok((await dec(a2, { decision: "PROPOSE_SLOT", slots: [{ date: "2026-12-01", time: "11:00", tz: "IST" }] })).status === 200, "client proposes a slot");
+await login("hiring@velaretail.example");
+ok((await req(`/portal/${R2.id}`)).status === 404, "other client gets 404 on the portal page");
+ok((await dec(a1, { decision: "SHORTLIST" })).status === 404, "other client cannot decide (404)");
+
+await login("recruiter@meridian.example");
+const pipe = await (await req(`/requisitions/${R2.id}/pipeline`)).text();
+ok(pipe.includes("Client shortlisted") && pipe.includes("Slot proposed"), "pipeline shows client decisions");
+ok((await req(`/api/candidates/${cand3}/delete`, { method: "POST" })).status === 400, "delete needs a recorded request");
+ok((await req(`/api/candidates/${cand3}/deletion-request`, { method: "POST", headers: { "content-type": "application/json" }, body: "{}" })).status === 201, "deletion request recorded");
+ok((await req(`/api/candidates/${cand3}/delete`, { method: "POST" })).status === 200, "deletion processed");
+ok((await req(`/api/files/${a3}`)).status === 404, "deleted CV file is gone");
+const fair = await (await req("/requisitions?tab=fairness")).text();
+ok(fair.includes("Access log") && fair.includes("Consent and deletion queue"), "fairness & audit tab renders");
+console.log(process.exitCode ? "\nSOME CHECKS FAILED (incl. day 5-6)" : "\nALL DAY 5-6 CHECKS PASSED");

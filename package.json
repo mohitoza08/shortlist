@@ -13,7 +13,12 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "postinstall": "prisma generate",
-    "samples": "tsx scripts/generate-resumes.ts"
+    "samples": "tsx scripts/generate-resumes.ts",
+    "seed:resumes": "tsx scripts/generate-seed-resumes.ts",
+    "seed:demo": "tsx scripts/seed-demo.ts",
+    "screenshots": "tsx scripts/screenshots.ts",
+    "test:e2e": "playwright test",
+    "pdf": "tsx scripts/make-pdf.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

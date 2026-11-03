@@ -1,0 +1,167 @@
+[
+  {
+    "file": "ritika-bansal.pdf",
+    "req": "Senior Java Developer",
+    "kind": "pdf"
+  },
+  {
+    "file": "arjun-rawat.pdf",
+    "req": "KYC Analyst",
+    "kind": "pdf"
+  },
+  {
+    "file": "pooja-nair.pdf",
+    "req": "Senior Java Developer",
+    "kind": "pdf"
+  },
+  {
+    "file": "aarav-khanna.pdf",
+    "req": "Senior Java Developer",
+    "kind": "pdf"
+  },
+  {
+    "file": "meher-sandhu.pdf",
+    "req": "KYC Analyst",
+    "kind": "pdf"
+  },
+  {
+    "file": "rohan-pillai.pdf",
+    "req": "React Developer",
+    "kind": "pdf"
+  },
+  {
+    "file": "sana-mirza.pdf",
+    "req": "Data Engineer",
+    "kind": "pdf"
+  },
+  {
+    "file": "kunal-bedi.pdf",
+    "req": "QA Engineer",
+    "kind": "pdf"
+  },
+  {
+    "file": "diya-menon.docx",
+    "req": "Senior Java Developer",
+    "kind": "docx"
+  },
+  {
+    "file": "yash-tandon.pdf",
+    "req": "KYC Analyst",
+    "kind": "pdf"
+  },
+  {
+    "file": "ira-chawla.pdf",
+    "req": "React Developer",
+    "kind": "pdf"
+  },
+  {
+    "file": "neel-parikh.pdf",
+    "req": "Data Engineer",
+    "kind": "scan"
+  },
+  {
+    "file": "zoya-hashmi.pdf",
+    "req": "QA Engineer",
+    "kind": "pdf"
+  },
+  {
+    "file": "aditya-rao.pdf",
+    "req": "Senior Java Developer",
+    "kind": "pdf"
+  },
+  {
+    "file": "kavya-subramanian.docx",
+    "req": "KYC Analyst",
+    "kind": "docx"
+  },
+  {
+    "file": "harsh-vohra.pdf",
+    "req": "React Developer",
+    "kind": "pdf"
+  },
+  {
+    "file": "mira-desai.pdf",
+    "req": "Data Engineer",
+    "kind": "pdf"
+  },
+  {
+    "file": "ishaan-bhatt.pdf",
+    "req": "QA Engineer",
+    "kind": "pdf"
+  },
+  {
+    "file": "tara-lobo.pdf",
+    "req": "Senior Java Developer",
+    "kind": "pdf"
+  },
+  {
+    "file": "vihaan-grover.pdf",
+    "req": "KYC Analyst",
+    "kind": "pdf"
+  },
+  {
+    "file": "anaya-kohli.pdf",
+    "req": "React Developer",
+    "kind": "scan"
+  },
+  {
+    "file": "reyansh-dutta.pdf",
+    "req": "Data Engineer",
+    "kind": "pdf"
+  },
+  {
+    "file": "sia-nambiar.pdf",
+    "req": "QA Engineer",
+    "kind": "pdf"
+  },
+  {
+    "file": "pranav-kulshreshtha.pdf",
+    "req": "Senior Java Developer",
+    "kind": "pdf"
+  },
+  {
+    "file": "leela-fernandes.pdf",
+    "req": "KYC Analyst",
+    "kind": "pdf"
+  },
+  {
+    "file": "dhruv-saxena.pdf",
+    "req": "React Developer",
+    "kind": "lowtext"
+  },
+  {
+    "file": "esha-trivedi.pdf",
+    "req": "Data Engineer",
+    "kind": "pdf"
+  },
+  {
+    "file": "arnav-mathur.pdf",
+    "req": "QA Engineer",
+    "kind": "pdf"
+  },
+  {
+    "file": "nisha-rawal.pdf",
+    "req": "Senior Java Developer",
+    "kind": "pdf"
+  },
+  {
+    "file": "kiran-bajwa.pdf",
+    "req": "KYC Analyst",
+    "kind": "pdf"
+  },
+  {
+    "file": "R_Bansal_CV_final.pdf",
+    "req": "Senior Java Developer",
+    "kind": "exact-duplicate"
+  },
+  {
+    "file": "arjun_cv_2024.pdf",
+    "req": "KYC Analyst",
+    "kind": "exact-duplicate"
+  },
+  {
+    "file": "ritika-bansal-updated.pdf",
+    "req": "Senior Java Developer",
+    "kind": "near-duplicate"
+  }
+]
