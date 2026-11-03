@@ -1,18 +1,8 @@
 import { auth } from "./auth";
-import { db } from "./db";
+import { ApiError, getApplicationFor, type SessionUser } from "./access";
 
-export class ApiError extends Error {
-  constructor(
-    public status: number,
-    public code: string,
-    message: string,
-    public details?: unknown,
-  ) {
-    super(message);
-  }
-}
-
-export type SessionUser = { id: string; role: "RECRUITER" | "CLIENT"; clientId: string | null; name: string };
+export { ApiError, getApplicationFor };
+export type { SessionUser };
 
 export async function requireUser(): Promise<SessionUser> {
   const s = await auth();
@@ -30,21 +20,6 @@ export async function requireClient() {
   const u = await requireUser();
   if (u.role !== "CLIENT" || !u.clientId) throw new ApiError(404, "NOT_FOUND", "Not found.");
   return u as SessionUser & { clientId: string };
-}
-
-/** Recruiter: any application. Client: only own client's submitted applications. 404 otherwise. */
-export async function getApplicationFor(user: SessionUser, id: string) {
-  const app = await db.application.findUnique({
-    where: { id },
-    include: { requisition: true, candidate: true },
-  });
-  if (!app) throw new ApiError(404, "NOT_FOUND", "Not found.");
-  if (user.role === "CLIENT") {
-    if (app.requisition.clientId !== user.clientId || !app.submittedAt || app.candidate.deletedAt) {
-      throw new ApiError(404, "NOT_FOUND", "Not found.");
-    }
-  }
-  return app;
 }
 
 export function errorResponse(e: unknown) {

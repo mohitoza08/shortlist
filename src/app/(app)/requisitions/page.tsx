@@ -6,14 +6,34 @@ import { getMetrics } from "@/lib/metrics";
 import { ageLabel } from "@/lib/utils";
 import { Badge, Button, Card, EmptyState, Input, PageHeader, Select } from "@/components/ui/primitives";
 import { ImpactStrip } from "@/components/app/impact-strip";
+import { FairnessPanel } from "@/components/app/fairness-panel";
+
+function TabLinks({ active }: { active: "list" | "fairness" }) {
+  const cls = (on: boolean) => `-mb-px border-b-2 pb-2.5 text-sm font-medium ${on ? "border-accent text-ink" : "border-transparent text-muted hover:text-ink"}`;
+  return (
+    <nav className="mb-6 flex gap-6 border-b border-line" aria-label="Sections">
+      <Link href="/requisitions" className={cls(active === "list")}>Requisitions</Link>
+      <Link href="/requisitions?tab=fairness" className={cls(active === "fairness")}>Fairness &amp; audit</Link>
+    </nav>
+  );
+}
 
 export const metadata = { title: "Requisitions" };
 export const dynamic = "force-dynamic";
 
-type SP = { q?: string; status?: string; client?: string; sort?: string };
+type SP = { q?: string; status?: string; client?: string; sort?: string; tab?: string; action?: string; actor?: string };
 
 export default async function RequisitionsPage({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
+  if (sp.tab === "fairness") {
+    return (
+      <>
+        <PageHeader title="Requisitions" subtitle="Screening workspace for Meridian Talent" />
+        <TabLinks active="fairness" />
+        <FairnessPanel action={sp.action} actor={sp.actor} />
+      </>
+    );
+  }
   const where: Prisma.RequisitionWhereInput = {
     ...(sp.q ? { title: { contains: sp.q, mode: "insensitive" } } : {}),
     ...(sp.status && ["OPEN", "CLOSED", "DRAFT"].includes(sp.status) ? { status: sp.status as "OPEN" | "CLOSED" | "DRAFT" } : {}),
@@ -51,6 +71,7 @@ export default async function RequisitionsPage({ searchParams }: { searchParams:
         }
       />
       <ImpactStrip m={metrics} />
+      <TabLinks active="list" />
 
       <form className="mb-5 grid gap-3 sm:grid-cols-[1fr_160px_200px_160px_auto]" role="search">
         <Input name="q" defaultValue={sp.q} placeholder="Search roles" aria-label="Search roles" />

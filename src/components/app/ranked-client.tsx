@@ -34,6 +34,7 @@ export function RankedClient({ requisitionId, rows, noticeMax }: { requisitionId
   const [stage, setStage] = useState("");
   const [showLow, setShowLow] = useState(true);
   const [dupOnly, setDupOnly] = useState(false);
+  const [showWithdrawn, setShowWithdrawn] = useState(false);
   const [sort, setSort] = useState("score");
   const [sel, setSel] = useState<Set<string>>(new Set());
   const [submitting, setSubmitting] = useState(false);
@@ -52,6 +53,7 @@ export function RankedClient({ requisitionId, rows, noticeMax }: { requisitionId
       }
       if (stage && r.stage !== stage) return false;
       if (dupOnly && r.duplicate === "NONE") return false;
+      if (!showWithdrawn && r.consent === "WITHDRAWN") return false;
       return true;
     });
     const by: Record<string, (a: RankedRow, b: RankedRow) => number> = {
@@ -61,7 +63,7 @@ export function RankedClient({ requisitionId, rows, noticeMax }: { requisitionId
       newest: (a, b) => b.createdAt.localeCompare(a.createdAt),
     };
     return [...list].sort(by[sort]);
-  }, [rows, q, minScore, showLow, noticeLe, conf, stage, dupOnly, sort]);
+  }, [rows, q, minScore, showLow, noticeLe, conf, stage, dupOnly, showWithdrawn, sort]);
 
   const setCandidate = (id: string | null) => {
     const p = new URLSearchParams(sp.toString());
@@ -110,7 +112,7 @@ export function RankedClient({ requisitionId, rows, noticeMax }: { requisitionId
         </div>
       )}
 
-      <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-[1.4fr_120px_130px_140px_150px_150px]">
+      <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-[1.4fr_110px_120px_170px_150px_160px]">
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name or skill" aria-label="Search name or skill" />
         <Input type="number" min={0} max={100} value={minScore || ""} onChange={(e) => setMinScore(Number(e.target.value) || 0)} placeholder="Min score" aria-label="Minimum score" />
         <Input type="number" min={0} value={noticeLe} onChange={(e) => setNoticeLe(e.target.value)} placeholder={`Notice ≤ ${noticeMax}`} aria-label="Maximum notice days" />
@@ -128,6 +130,7 @@ export function RankedClient({ requisitionId, rows, noticeMax }: { requisitionId
       <div className="mb-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
         <label className="flex items-center gap-2">Show low scorers <Switch label="Show low scorers" checked={showLow} onChange={setShowLow} /></label>
         <label className="flex items-center gap-2">Duplicates only <Switch label="Duplicates only" checked={dupOnly} onChange={setDupOnly} /></label>
+        <label className="flex items-center gap-2">Show withdrawn consent <Switch label="Show withdrawn consent" checked={showWithdrawn} onChange={setShowWithdrawn} /></label>
         <span className="text-muted">{filtered.length} of {rows.length} candidates</span>
       </div>
 
@@ -143,7 +146,7 @@ export function RankedClient({ requisitionId, rows, noticeMax }: { requisitionId
       )}
 
       {filtered.length === 0 ? (
-        <EmptyState title="No candidates match these filters" action={<Button variant="secondary" onClick={() => { setQ(""); setMinScore(0); setNoticeLe(""); setConf(""); setStage(""); setShowLow(true); setDupOnly(false); }}>Clear filters</Button>} />
+        <EmptyState title="No candidates match these filters" action={<Button variant="secondary" onClick={() => { setQ(""); setMinScore(0); setNoticeLe(""); setConf(""); setStage(""); setShowLow(true); setDupOnly(false); setShowWithdrawn(false); }}>Clear filters</Button>} />
       ) : (
         <>
           <Card className="hidden overflow-hidden lg:block">

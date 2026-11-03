@@ -17,14 +17,24 @@ const CITIES = [
   "Noida", "Gurgaon", "Gurugram", "Delhi", "Bengaluru", "Bangalore", "Pune", "Mumbai", "Hyderabad", "Chennai", "Remote",
 ];
 
+/** Prefer a real experience bullet over a header, "Key: value" line or a bare skills list. */
 export function lineContaining(text: string, terms: string[]) {
   const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const hits: { line: string; rank: number }[] = [];
   for (const t of terms) {
-    const re = new RegExp(`(^|[^a-z0-9])${t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([^a-z0-9]|$)`, "i");
-    const hit = lines.find((l) => re.test(l));
-    if (hit) return hit.length > 220 ? hit.slice(0, 220) : hit;
+    const esc = t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const re = new RegExp(`(^|[^a-z0-9])${esc}([^a-z0-9]|$)`, "i");
+    for (const l of lines) {
+      if (!re.test(l)) continue;
+      const bullet = /^[-•*]\s/.test(l);
+      const keyValue = /^[A-Za-z ]{3,24}:\s/.test(l);
+      const list = (l.match(/,/g) ?? []).length >= 3 && !bullet;
+      hits.push({ line: l.replace(/^[-•*]\s+/, ""), rank: bullet ? 0 : list ? 2 : keyValue ? 3 : 1 });
+    }
   }
-  return null;
+  hits.sort((a, b) => a.rank - b.rank);
+  const best = hits[0]?.line;
+  return best ? (best.length > 220 ? best.slice(0, 220) : best) : null;
 }
 
 export const skillTerms = (label: string) => {

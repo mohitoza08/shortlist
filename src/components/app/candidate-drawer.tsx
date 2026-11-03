@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ExternalLink } from "lucide-react";
-import { AvatarInitials, Badge, Button, ConfidenceDot, Drawer, ErrorState, Field, Input, Notice, ScoreBar, Skeleton, Tabs } from "@/components/ui/primitives";
+import { AvatarInitials, Badge, Button, ConfidenceDot, Drawer, ErrorState, Field, Input, Modal, Notice, ScoreBar, Select, Skeleton, Tabs, Textarea } from "@/components/ui/primitives";
+import { REJECT_REASONS } from "@/lib/stages";
 import { bandFor } from "@/lib/ai/score";
 
 type Detail = {
-  id: string; name: string; email: string; phone: string; location: string;
+  id: string; candidateId: string; name: string; email: string; phone: string; location: string;
   consentStatus: "GIVEN" | "PENDING" | "WITHDRAWN";
   profile: { currentRole?: string; currentCompany?: string; yearsExperience?: number | null; noticeDays?: number | null; expectedCtcLpa?: number | null; location?: string | null; summary?: string; strengths?: string[]; gaps?: string[]; source?: string; edited?: boolean };
   parseStatus: string; reasons: string[]; overallScore: number | null; confidence: number | null; stage: string;
@@ -19,6 +20,7 @@ type Detail = {
 
 type Tab = "overview" | "resume" | "scorecard" | "activity";
 const ACTION: Record<string, string> = {
+  STAGE_CHANGED: "Stage changed", CLIENT_VIEWED: "Client opened the CV", CLIENT_SHORTLISTED: "Client shortlisted", CLIENT_REJECTED: "Client rejected", SLOT_PROPOSED: "Client proposed an interview slot", DELETION_REQUESTED: "Deletion requested",
   CV_UPLOADED: "CV uploaded", CV_VIEWED: "CV opened", PROFILE_EDITED: "Profile edited", SCORE_RERUN: "Score calculated",
   SUBMITTED: "Submitted to client", CONSENT_UPDATED: "Consent updated",
 };
@@ -28,6 +30,25 @@ export function CandidateDrawer({ id, onClose, onChanged }: { id: string | null;
   const [err, setErr] = useState(false);
   const [tab, setTab] = useState<Tab>("overview");
   const [busy, setBusy] = useState(false);
+  const [dlg, setDlg] = useState<null | "reject" | "consent" | "delete">(null);
+  const [reason, setReason] = useState("");
+  const [note, setNote] = useState("");
+  const [consent, setConsent] = useState<"GIVEN" | "PENDING" | "WITHDRAWN">("WITHDRAWN");
+  const [delRequested, setDelRequested] = useState(false);
+
+  async function act(url: string, body: object, ok: string) {
+    setBusy(true);
+    const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    setBusy(false);
+    if (!res.ok) { toast.error((await res.json())?.error?.message ?? "Something went wrong."); return false; }
+    toast.success(ok);
+    setDlg(null);
+    setReason("");
+    setNote("");
+    await load();
+    onChanged();
+    return true;
+  }
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -90,9 +111,16 @@ export function CandidateDrawer({ id, onClose, onChanged }: { id: string | null;
       title="Candidate"
       footer={
         d && (
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-xs text-muted">{d.submittedAt ? "Submitted to the client" : !d.viewedAt ? "Open this CV before submitting it to the client." : "Ready to submit"}</p>
-            <Button onClick={submit} loading={busy} disabled={!canSubmit} disabledReason={why}>Submit to client</Button>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap gap-1">
+              <Button variant="ghost" size="sm" onClick={() => setDlg("reject")} disabled={d.stage === "REJECTED"} disabledReason="Already rejected">Reject</Button>
+              <Button variant="ghost" size="sm" onClick={() => setDlg("consent")}>Consent</Button>
+              <Button variant="ghost" size="sm" onClick={() => setDlg("delete")}>Request deletion</Button>
+            </div>
+            <div className="flex items-center gap-3">
+              <p className="hidden text-xs text-muted sm:block">{d.submittedAt ? "Submitted to the client" : !d.viewedAt ? "Open this CV before submitting it to the client." : "Ready to submit"}</p>
+              <Button onClick={submit} loading={busy} disabled={!canSubmit} disabledReason={why}>Submit to client</Button>
+            </div>
           </div>
         )
       }
@@ -210,6 +238,39 @@ export function CandidateDrawer({ id, onClose, onChanged }: { id: string | null;
           </div>
         </div>
       )}
+      <Modal open={dlg === "reject"} onClose={() => setDlg(null)} title="Reject this candidate">
+        <p className="mb-3 text-sm text-muted">The candidate stays searchable. This only moves them to Rejected.</p>
+        <Select aria-label="Reason" value={reason} onChange={(e) => setReason(e.target.value)}>
+          <option value="">Choose a reason</option>
+          {REJECT_REASONS.map((r) => <option key={r}>{r}</option>)}
+        </Select>
+        <div className="mt-5 flex justify-end gap-2">
+          <Button variant="secondary" onClick={() => setDlg(null)}>Cancel</Button>
+          <Button variant="danger" loading={busy} disabled={!reason} disabledReason="Choose a reason" onClick={() => d && act(`/api/applications/${d.id}/reject`, { reason }, "Candidate rejected")}>Reject</Button>
+        </div>
+      </Modal>
+      <Modal open={dlg === "consent"} onClose={() => setDlg(null)} title="Update consent">
+        <Select aria-label="Consent status" value={consent} onChange={(e) => setConsent(e.target.value as typeof consent)}>
+          <option value="GIVEN">Given</option><option value="PENDING">Pending</option><option value="WITHDRAWN">Withdrawn</option>
+        </Select>
+        <Field label="Note" hint="Required when withdrawing: how and when the candidate withdrew."><Textarea rows={3} value={note} onChange={(e) => setNote(e.target.value)} /></Field>
+        {consent === "WITHDRAWN" && <p className="mt-2 text-xs text-warn">Withdrawn candidates are blocked from submission and hidden from the default ranking.</p>}
+        <div className="mt-5 flex justify-end gap-2">
+          <Button variant="secondary" onClick={() => setDlg(null)}>Cancel</Button>
+          <Button loading={busy} disabled={consent === "WITHDRAWN" && !note.trim()} disabledReason="Add a note" onClick={() => d && act(`/api/candidates/${d.candidateId}/consent`, { status: consent, note }, "Consent updated")}>Save</Button>
+        </div>
+      </Modal>
+      <Modal open={dlg === "delete"} onClose={() => setDlg(null)} title="Delete this candidate">
+        <p className="text-sm">This removes the CV and parsed data. Scores stay anonymously for reporting.</p>
+        <p className="mt-2 text-sm text-muted">Name, contact details, the file, parsed profile and evidence quotes are removed. The overall score and stage remain without any identity. This cannot be undone.</p>
+        <div className="mt-5 flex justify-end gap-2">
+          <Button variant="secondary" onClick={() => setDlg(null)}>Cancel</Button>
+          {!delRequested ? (
+            <Button variant="secondary" loading={busy} onClick={async () => { if (d && (await act(`/api/candidates/${d.candidateId}/deletion-request`, {}, "Deletion request recorded"))) setDelRequested(true); }}>Record request</Button>
+          ) : null}
+          <Button variant="danger" loading={busy} disabled={!delRequested} disabledReason="Record the deletion request first" onClick={async () => { if (d && (await act(`/api/candidates/${d.candidateId}/delete`, {}, "Candidate deleted"))) onClose(); }}>Delete now</Button>
+        </div>
+      </Modal>
     </Drawer>
   );
 }

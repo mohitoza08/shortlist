@@ -15,6 +15,7 @@ export default async function RankedPage({ params }: { params: Promise<{ id: str
       client: true,
       criteria: { orderBy: { order: "asc" } },
       applications: {
+        where: { candidate: { deletedAt: null } },
         orderBy: [{ overallScore: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
         include: { candidate: true, criterionScores: true },
       },
@@ -68,9 +69,12 @@ export default async function RankedPage({ params }: { params: Promise<{ id: str
           </span>
         }
         actions={
+          <>
+          <Link href={`/requisitions/${id}/pipeline`}><Button variant="secondary">Pipeline</Button></Link>
           <Link href={`/requisitions/${id}/upload`}>
             <Button variant="secondary"><Upload className="size-4" aria-hidden /> Upload CVs</Button>
           </Link>
+          </>
         }
       />
       <RankedClient requisitionId={id} rows={rows} noticeMax={req.noticeMaxDays} />
