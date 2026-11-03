@@ -46,3 +46,6 @@ next-env.d.ts
 
 # generated PDFs outside docs
 /*.pdf
+
+# local dev database cluster
+/.pgdata/
