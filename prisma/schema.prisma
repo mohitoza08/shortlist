@@ -224,7 +224,7 @@ model Application {
   @@index([candidateId])
 }
 
-/// Private resume bytes. Demo storage when no object store is configured (see BUILD_LOG D4).
+/// Private resume bytes. Demo storage when no object store is configured.
 model ResumeFile {
   applicationId String      @id
   bytes         Bytes
