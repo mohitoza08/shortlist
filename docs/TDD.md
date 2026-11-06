@@ -12,7 +12,7 @@ title: "Shortlist — Technical Design Document"
 | **Live URL** | Not deployed yet. Runs locally with `npm run build && npm run start`. See `deployment.md`. |
 | **Demo accounts** | `recruiter@meridian.example`, `hiring@ashfordbank.example`, `hiring@velaretail.example` · password `Demo1234!` |
 | **Date** | 3 November 2026 |
-| **Author** | Manhar Creatives |
+| **Author** | Mohit Oza |
 
 > **Read this first: what is and is not verified.** Everything below describes the code as built. Two limits to know:
 > (1) the live Groq path was checked on 3 sample CVs only (scores, JSON validity, 0 ungrounded quotes, injection CV scored low). It was not run over all 33 seed CVs; the seeded demo scores come from the rule-based extractor, which is labelled as such in the UI and in `AiRun` rows.
