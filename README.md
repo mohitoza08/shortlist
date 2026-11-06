@@ -10,7 +10,7 @@ A recruiter pastes a job description and gets an editable scorecard. They upload
 |---|---|
 | Demo | Not deployed yet. See [deployment.md](deployment.md) to run it locally. |
 | Design doc | [docs/TDD.md](docs/TDD.md) (PDF: `docs/TDD.pdf`) |
-| Honest status | [BUILD_LOG.md](BUILD_LOG.md) lists assumptions, cuts and known limits |
+| Honest status | TDD sections 3 (assumptions) and 13 (cuts and known limits) |
 
 ## What it does
 

@@ -1,7 +1,7 @@
 /**
  * Rule-based extraction. Used when AI_MOCK=1 or no API key, and as the manual-entry fallback for the JD.
  * It only ever quotes lines that exist in the text, so grounding still holds. It is labelled
- * "heuristic" in AiRun/BUILD_LOG and is never presented as model output.
+ * "heuristic" in AiRun and is never presented as model output.
  */
 import type { CvExtraction, JdExtraction } from "./schema";
 

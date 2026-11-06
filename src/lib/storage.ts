@@ -2,7 +2,7 @@ import { db } from "./db";
 
 /**
  * Private resume storage. Demo build keeps bytes in Postgres (never a public URL);
- * swap for Vercel Blob private / S3 behind this interface. See BUILD_LOG D4.
+ * swap for Vercel Blob private / S3 behind this interface.
  */
 export async function putFile(applicationId: string, bytes: Buffer) {
   await db.resumeFile.upsert({
