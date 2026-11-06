@@ -4,12 +4,12 @@ import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getMetrics } from "@/lib/metrics";
 import { ageLabel } from "@/lib/utils";
-import { Badge, Button, Card, EmptyState, Input, PageHeader, Select } from "@/components/ui/primitives";
+import { AvatarInitials, Badge, Button, Card, EmptyState, Input, PageHeader, Progress, Select } from "@/components/ui/primitives";
 import { ImpactStrip } from "@/components/app/impact-strip";
 import { FairnessPanel } from "@/components/app/fairness-panel";
 
 function TabLinks({ active }: { active: "list" | "fairness" }) {
-  const cls = (on: boolean) => `-mb-px border-b-2 pb-2.5 text-sm font-medium ${on ? "border-accent text-ink" : "border-transparent text-muted hover:text-ink"}`;
+  const cls = (on: boolean) => `-mb-px border-b-2 pb-2.5 text-sm font-medium ${on ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink"} t-fast`;
   return (
     <nav className="mb-6 flex gap-6 border-b border-line" aria-label="Sections">
       <Link href="/requisitions" className={cls(active === "list")}>Requisitions</Link>
@@ -73,15 +73,15 @@ export default async function RequisitionsPage({ searchParams }: { searchParams:
       <ImpactStrip m={metrics} />
       <TabLinks active="list" />
 
-      <form className="mb-5 grid gap-3 sm:grid-cols-[1fr_160px_200px_160px_auto]" role="search">
-        <Input name="q" defaultValue={sp.q} placeholder="Search roles" aria-label="Search roles" />
-        <Select name="status" defaultValue={sp.status ?? ""} aria-label="Status">
+      <form className="mb-5 flex flex-wrap items-center gap-2.5" role="search">
+        <Input name="q" defaultValue={sp.q} placeholder="Search roles" aria-label="Search roles" className="h-10 min-w-[220px] flex-1 sm:max-w-sm" />
+        <Select name="status" defaultValue={sp.status ?? ""} aria-label="Status" className="w-[140px]">
           <option value="">All statuses</option>
           <option value="OPEN">Open</option>
           <option value="CLOSED">Closed</option>
           <option value="DRAFT">Draft</option>
         </Select>
-        <Select name="client" defaultValue={sp.client ?? ""} aria-label="Client">
+        <Select name="client" defaultValue={sp.client ?? ""} aria-label="Client" className="w-[170px]">
           <option value="">All clients</option>
           {clients.map((c) => (
             <option key={c.id} value={c.id}>
@@ -89,13 +89,18 @@ export default async function RequisitionsPage({ searchParams }: { searchParams:
             </option>
           ))}
         </Select>
-        <Select name="sort" defaultValue={sp.sort ?? ""} aria-label="Sort">
+        <Select name="sort" defaultValue={sp.sort ?? ""} aria-label="Sort" className="w-[140px]">
           <option value="">Newest</option>
           <option value="cvs">Most CVs</option>
         </Select>
         <Button type="submit" variant="secondary">
           Apply
         </Button>
+        {filtered && (
+          <Link href="/requisitions" className="text-sm text-muted underline-offset-2 hover:text-ink hover:underline">
+            Clear
+          </Link>
+        )}
       </form>
 
       {reqs.length === 0 ? (
@@ -115,8 +120,8 @@ export default async function RequisitionsPage({ searchParams }: { searchParams:
             <table className="w-full text-left">
               <thead className="border-b border-line bg-surface-2/60">
                 <tr className="label">
-                  {["Role", "Client", "Stages", "CVs", "Submitted", "Age", "Owner", ""].map((h) => (
-                    <th key={h} className="px-4 py-3 font-medium">
+                  {["Role", "Progress", "CVs", "Submitted", "Age", ""].map((h) => (
+                    <th key={h} className="px-5 py-3 font-medium">
                       {h}
                     </th>
                   ))}
@@ -128,30 +133,30 @@ export default async function RequisitionsPage({ searchParams }: { searchParams:
                   const processed = r.applications.filter((a) => a.parseStatus === "PARSED" || a.parseStatus === "NEEDS_REVIEW").length;
                   const total = r.applications.length;
                   return (
-                    <tr key={r.id} className="border-b border-line last:border-0 t-fast hover:bg-surface-2/50">
-                      <td className="px-4 py-3.5">
-                        <Link href={`/requisitions/${r.id}`} className="font-medium hover:text-accent">
-                          {r.title}
-                        </Link>
-                        <p className="text-xs text-muted">
-                          {r.location || "—"} · {r.minExpYears}–{r.maxExpYears} yrs
-                        </p>
-                      </td>
-                      <td className="px-4 py-3.5">{r.client.name}</td>
-                      <td className="px-4 py-3.5">
-                        <div className="h-1.5 w-28 overflow-hidden rounded-full bg-surface-2" role="img" aria-label={`${processed} of ${total} processed, ${submitted} submitted`}>
-                          <div className="h-full bg-accent" style={{ width: total ? `${(processed / total) * 100}%` : 0 }} />
+                    <tr key={r.id} className="group relative border-b border-line last:border-0 t-fast hover:bg-surface-2/60">
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <AvatarInitials name={r.client.name} size={38} />
+                          <div className="min-w-0">
+                            <Link href={`/requisitions/${r.id}`} className="font-medium tracking-[-0.01em] after:absolute after:inset-0 group-hover:text-accent">
+                              {r.title}
+                            </Link>
+                            <p className="mt-0.5 text-[13px] text-muted">
+                              {r.client.name} · {r.location || "Location open"} · {r.minExpYears}–{r.maxExpYears} yrs
+                            </p>
+                          </div>
+                          {r.status !== "OPEN" && <Badge className="ml-1">{r.status.toLowerCase()}</Badge>}
                         </div>
-                        <p className="mt-1 text-xs text-muted">{processed}/{total} scored</p>
                       </td>
-                      <td className="px-4 py-3.5 tabular-nums">{total}</td>
-                      <td className="px-4 py-3.5 tabular-nums">{submitted}</td>
-                      <td className="px-4 py-3.5 text-muted">{ageLabel(r.createdAt)}</td>
-                      <td className="px-4 py-3.5 text-muted">{r.createdBy.name}</td>
-                      <td className="px-4 py-3.5 text-right">
-                        <Link href={`/requisitions/${r.id}`} aria-label={`Open ${r.title}`}>
-                          <ChevronRight className="inline size-4 text-muted" />
-                        </Link>
+                      <td className="px-5 py-4">
+                        <Progress value={processed} max={total} label={`${processed} of ${total} CVs scored`} className="w-32" />
+                        <p className="mono mt-1.5 text-[11.5px] text-muted">{processed}/{total} scored</p>
+                      </td>
+                      <td className="mono px-5 py-4 text-[14px]">{total}</td>
+                      <td className="mono px-5 py-4 text-[14px]">{submitted}</td>
+                      <td className="px-5 py-4 text-[13px] text-muted">{ageLabel(r.createdAt)}</td>
+                      <td className="px-5 py-4 text-right">
+                        <ChevronRight className="inline size-4 text-muted t-fast group-hover:translate-x-0.5 group-hover:text-ink" aria-hidden />
                       </td>
                     </tr>
                   );
@@ -167,9 +172,12 @@ export default async function RequisitionsPage({ searchParams }: { searchParams:
                 <Link href={`/requisitions/${r.id}`}>
                   <Card className="p-4 t-fast hover:shadow-[var(--shadow-hover)]">
                     <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-medium">{r.title}</p>
-                        <p className="text-xs text-muted">{r.client.name}</p>
+                      <div className="flex items-center gap-3">
+                        <AvatarInitials name={r.client.name} size={36} />
+                        <div>
+                          <p className="font-medium tracking-[-0.01em]">{r.title}</p>
+                          <p className="text-xs text-muted">{r.client.name}</p>
+                        </div>
                       </div>
                       <Badge tone={r.status === "OPEN" ? "accent" : "neutral"}>{r.status.toLowerCase()}</Badge>
                     </div>

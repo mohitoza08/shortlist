@@ -121,7 +121,7 @@ export function NewRequisitionForm({ clients }: { clients: { id: string; name: s
   }
 
   const row = (c: CriterionInput, i: number) => (
-    <li key={i} className="grid gap-3 border-b border-line py-3 last:border-0 sm:grid-cols-[1fr_auto]">
+    <li key={i} className="grid gap-3 rounded-xl border border-line bg-surface p-3 t-fast hover:border-line-strong sm:grid-cols-[1fr_auto]">
       <div className="flex items-center gap-3">
         <Badge>{TYPE_LABEL[c.type]}</Badge>
         <Input aria-label="Criterion label" value={c.label} onChange={(e) => update(i, { label: e.target.value })} className="h-9" />
@@ -167,8 +167,9 @@ export function NewRequisitionForm({ clients }: { clients: { id: string; name: s
         )}
       </section>
 
-      <Card className="p-5">
-        <h2 className="display text-xl">Scorecard</h2>
+      <Card className="h-fit p-6 lg:sticky lg:top-6">
+        <h2 className="display text-[22px]">Scorecard</h2>
+        <p className="mt-1 text-sm text-muted">What every CV is judged on. You are in control of this.</p>
         {state === "extracting" ? (
           <div className="mt-4 space-y-3" aria-live="polite">
             <p className="text-sm text-muted">Reading the JD…</p>
@@ -220,16 +221,23 @@ export function NewRequisitionForm({ clients }: { clients: { id: string; name: s
             </div>
 
             {criteria.length === 0 ? (
-              <p className="mt-3 rounded-md bg-surface-2 px-4 py-6 text-center text-sm text-muted">
+              <p className="mt-3 rounded-xl border border-dashed border-line-strong px-4 py-8 text-center text-sm text-muted">
                 No criteria yet. Extract them from the JD, or add them by hand.
               </p>
             ) : (
               <>
-                <ul className="mt-1">{criteria.map((c, i) => (c.weight > 0 || c.mustHave ? row(c, i) : null))}</ul>
+                {total > 0 && (
+                  <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-surface-3" role="img" aria-label={`Weights total ${total} percent`}>
+                    {scored.map((c, i) => (
+                      <div key={i} title={`${c.label} · ${c.weight}`} className={i % 2 ? "bg-accent-bright" : "bg-accent"} style={{ width: `${Math.min(100, (c.weight / Math.max(total, 100)) * 100)}%`, borderRight: "2px solid var(--surface)" }} />
+                    ))}
+                  </div>
+                )}
+                <ul className="mt-3 space-y-2">{criteria.map((c, i) => (c.weight > 0 || c.mustHave ? row(c, i) : null))}</ul>
                 {bonus.length > 0 && (
                   <>
                     <p className="label mt-5">Nice to have · bonus</p>
-                    <ul className="mt-1">{criteria.map((c, i) => (c.weight === 0 && !c.mustHave ? row(c, i) : null))}</ul>
+                    <ul className="mt-2 space-y-2">{criteria.map((c, i) => (c.weight === 0 && !c.mustHave ? row(c, i) : null))}</ul>
                   </>
                 )}
               </>

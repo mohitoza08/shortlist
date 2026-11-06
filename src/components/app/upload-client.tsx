@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Upload } from "lucide-react";
-import { Badge, Button, Card, Checkbox, Notice } from "@/components/ui/primitives";
+import { FileText, Upload } from "lucide-react";
+import { Badge, Button, Card, Checkbox, Notice, Progress } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
 
 const MAX_FILES = 500;
@@ -146,48 +146,55 @@ export function UploadClient({ requisitionId, mustHaves }: { requisitionId: stri
   const ready = count(["Ready", "Needs review", "Possible duplicate"]);
   const busy = count(["Queued", "Uploading", "Parsing", "Provider limit"]);
 
+  const done = count(["Ready", "Needs review", "Duplicate", "Possible duplicate", "Failed"]);
+
   return (
     <div className="space-y-6">
-      <Card className="p-4">
-        <p className="label mb-2">Must-have skills</p>
-        <div className="flex flex-wrap gap-2">
-          {mustHaves.length ? mustHaves.map((m) => <Badge key={m} tone="accent">{m}</Badge>) : <span className="text-sm text-muted">No must-have skills set.</span>}
-        </div>
-      </Card>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="label mr-1">Scoring against</span>
+        {mustHaves.length ? mustHaves.map((m) => <Badge key={m} tone="accent">{m}</Badge>) : <span className="text-sm text-muted">No must-have skills set.</span>}
+      </div>
 
-      <Card className="p-5">
-        <Checkbox
-          checked={consent}
-          onChange={(e) => setConsent(e.target.checked)}
-          label="I confirm each candidate has consented to hiring use. I can record withdrawal or deletion later."
-        />
-        <div
-          onDragOver={(e) => { e.preventDefault(); if (consent) setDrag(true); }}
-          onDragLeave={() => setDrag(false)}
-          onDrop={(e) => { e.preventDefault(); setDrag(false); if (consent) addFiles([...e.dataTransfer.files]); }}
-          className={cn(
-            "mt-4 flex flex-col items-center justify-center rounded-[10px] border-2 border-dashed px-6 py-12 text-center t-fast",
-            drag ? "border-accent bg-accent-soft" : "border-line-strong",
-            !consent && "opacity-60",
-          )}
-        >
-          <Upload className="mb-3 size-6 text-muted" aria-hidden />
-          <p className="display text-xl">{rows.length ? "Drop more CVs here" : "Drop CVs here"}</p>
-          <p className="mt-1 text-sm text-muted">PDF or DOCX, up to 500 files, 10 MB each.</p>
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
-            <Button variant="secondary" disabled={!consent} disabledReason="Confirm candidate consent first" onClick={() => inputRef.current?.click()}>
-              Choose files
-            </Button>
-            {rows.length === 0 && (
-              <Button variant="ghost" disabled={!consent} disabledReason="Confirm candidate consent first" onClick={trySamples}>
-                Try 3 sample CVs
-              </Button>
-            )}
-          </div>
-          <input ref={inputRef} type="file" multiple accept=".pdf,.docx" className="sr-only" aria-label="Choose CV files"
-            onChange={(e) => { addFiles([...(e.target.files ?? [])]); e.target.value = ""; }} />
+      <Card className="overflow-hidden p-0">
+        <div className="border-b border-line bg-surface-2/50 px-5 py-4">
+          <Checkbox
+            checked={consent}
+            onChange={(e) => setConsent(e.target.checked)}
+            label="I confirm each candidate has consented to hiring use. I can record withdrawal or deletion later."
+          />
         </div>
-        {!consent && <p className="mt-2 text-xs text-muted">Confirm consent to enable uploading.</p>}
+        <div className="p-5">
+          <div
+            onDragOver={(e) => { e.preventDefault(); if (consent) setDrag(true); }}
+            onDragLeave={() => setDrag(false)}
+            onDrop={(e) => { e.preventDefault(); setDrag(false); if (consent) addFiles([...e.dataTransfer.files]); }}
+            className={cn(
+              "hair-grid flex flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 text-center t-fast",
+              rows.length ? "py-8" : "py-16",
+              drag ? "scale-[1.01] border-accent-bright bg-accent-soft" : "border-line-strong",
+              !consent && "opacity-50",
+            )}
+          >
+            <span className={cn("mb-4 grid size-12 place-items-center rounded-full bg-ink text-white t-fast", drag && "bg-accent")}>
+              <Upload className="size-5" aria-hidden />
+            </span>
+            <p className="serif text-[30px] leading-none">{rows.length ? "Drop more CVs here" : "Drop CVs here"}</p>
+            <p className="mt-2 text-sm text-muted">PDF or DOCX · up to 500 files · 10 MB each</p>
+            <div className="mt-5 flex flex-wrap justify-center gap-2">
+              <Button variant="secondary" disabled={!consent} disabledReason="Confirm candidate consent first" onClick={() => inputRef.current?.click()}>
+                Choose files
+              </Button>
+              {rows.length === 0 && (
+                <Button variant="ghost" disabled={!consent} disabledReason="Confirm candidate consent first" onClick={trySamples}>
+                  Try 3 sample CVs
+                </Button>
+              )}
+            </div>
+            <input ref={inputRef} type="file" multiple accept=".pdf,.docx" className="sr-only" aria-label="Choose CV files"
+              onChange={(e) => { addFiles([...(e.target.files ?? [])]); e.target.value = ""; }} />
+          </div>
+          {!consent && <p className="mt-3 text-center text-xs text-muted">Tick the consent box above to unlock uploading.</p>}
+        </div>
       </Card>
 
       {rows.length > 50 && <Notice tone="warn">Free-tier AI processes batches slowly. Keep this tab open; unfinished CVs resume the next time you open this page.</Notice>}
@@ -199,25 +206,34 @@ export function UploadClient({ requisitionId, mustHaves }: { requisitionId: stri
       )}
 
       {rows.length === 0 ? (
-        <p className="py-6 text-center text-muted">No CVs yet. Drop a batch to start screening.</p>
+        <p className="py-4 text-center text-sm text-muted">Nothing here yet. Your first scored CV appears in seconds.</p>
       ) : (
-        <Card>
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3">
-            <p className="text-sm text-muted">
-              {rows.length} total · {count(["Ready"])} ready · {count(["Needs review"])} need review · {count(["Duplicate", "Possible duplicate"])} duplicates · {count(["Failed"])} failed
-            </p>
-            <Link href={`/requisitions/${requisitionId}`}>
-              <Button disabled={ready === 0} disabledReason="Waiting for the first CV to finish">View ranked list</Button>
-            </Link>
+        <Card className="overflow-hidden">
+          <div className="border-b border-line px-5 py-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-muted">
+                {rows.length} total · {count(["Ready"])} ready · {count(["Needs review"])} need review · {count(["Duplicate", "Possible duplicate"])} duplicates · {count(["Failed"])} failed
+              </p>
+              <Link href={`/requisitions/${requisitionId}`}>
+                <Button disabled={ready === 0} disabledReason="Waiting for the first CV to finish">View ranked list</Button>
+              </Link>
+            </div>
+            <Progress value={done} max={rows.length} label={`${done} of ${rows.length} CVs finished`} className="mt-3" />
           </div>
-          <ul>
+          <ul className="max-h-[480px] overflow-y-auto">
             {rows.map((r) => (
-              <li key={r.key} className="flex items-center gap-3 border-b border-line px-4 py-3 last:border-0">
+              <li key={r.key} className="flex items-center gap-3 border-b border-line px-5 py-3 last:border-0">
+                <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-surface-2 text-muted ring-1 ring-inset ring-line">
+                  <FileText className="size-4" aria-hidden />
+                </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{r.name}</p>
                   <p className="truncate text-xs text-muted">{r.size ? kb(r.size) : ""}{r.note ? `${r.size ? " · " : ""}${r.note}` : ""}</p>
                 </div>
-                <Badge tone={TONE[r.status]}>{r.status}</Badge>
+                <Badge tone={TONE[r.status]}>
+                  {["Uploading", "Parsing"].includes(r.status) && <span className="live-dot" aria-hidden />}
+                  {r.status}
+                </Badge>
                 {r.status === "Failed" && r.appId && <Button size="sm" variant="secondary" onClick={() => retry(r)}>Retry</Button>}
               </li>
             ))}
