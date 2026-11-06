@@ -16,7 +16,7 @@ export function Shell({ user, children }: { user: { name: string; email: string 
             <span className="hidden lg:block">
               <Wordmark size={26} />
             </span>
-            <span className="display text-2xl lg:hidden">S</span>
+            <span className="lg:hidden"><Wordmark size={22} markOnly /></span>
           </Link>
           <NavLinks variant="side" />
         </div>

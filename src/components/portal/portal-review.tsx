@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { AvatarInitials, Badge, Button, Card, ConfidenceDot, Field, Input, Modal, ScoreBar, Select, Textarea } from "@/components/ui/primitives";
+import { Badge, Button, Card, ConfidenceDot, Field, Input, Modal, Receipt, ScoreRing, Select, Textarea } from "@/components/ui/primitives";
 import { REJECT_REASONS } from "@/lib/stages";
 
 export type PortalCandidate = {
@@ -49,27 +49,21 @@ export function PortalReview({ candidates }: { candidates: PortalCandidate[] }) 
         {candidates.map((c) => (
           <li key={c.id}>
             <Card className="p-5">
-              <div className="flex items-start gap-3">
-                <AvatarInitials name={c.name} size={44} />
+              <div className="flex items-start gap-4">
+                <ScoreRing score={c.score} size={64} />
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-lg font-semibold leading-6">{c.name}</h2>
+                  <h2 className="text-[19px] font-semibold leading-6 tracking-[-0.02em]">{c.name}</h2>
                   <p className="text-sm text-muted">{c.role ?? "Role not stated"}{c.years != null && ` · ${c.years} yrs`}{c.location && ` · ${c.location}`}</p>
-                  <p className="mt-1 text-sm text-muted">{c.maskedEmail} · {c.maskedPhone}</p>
-                </div>
-                <div className="text-right">
-                  <p className="display text-4xl leading-9">{c.score != null ? Math.round(c.score) : "—"}</p>
-                  <ConfidenceDot value={c.confidence} />
+                  <p className="mono mt-1.5 text-[12px] text-muted">{c.maskedEmail} · {c.maskedPhone}</p>
                 </div>
               </div>
-
-              <div className="mt-3"><ScoreBar score={c.score} showNumber={false} /></div>
+              <div className="mt-3"><ConfidenceDot value={c.confidence} /></div>
 
               {c.highlights.length > 0 && (
                 <ul className="mt-4 space-y-2">
                   {c.highlights.map((h) => (
-                    <li key={h.label} className="border-l-2 border-accent bg-accent-soft/50 px-3 py-2 text-sm">
-                      <span className="label block">{h.label}</span>
-                      <span className="italic">“{h.quote}”</span>
+                    <li key={h.label}>
+                      <Receipt label={h.label}>“{h.quote}”</Receipt>
                     </li>
                   ))}
                 </ul>

@@ -40,7 +40,7 @@ export function NavLinks({ variant }: { variant: "side" | "bottom" }) {
             aria-current={active(match, href) ? "page" : undefined}
             className={cn(
               "flex items-center gap-3 rounded-md px-2.5 py-2 text-sm t-fast lg:px-3",
-              active(match, href) ? "bg-accent-soft font-medium text-accent" : "text-muted hover:bg-surface-2 hover:text-ink",
+              active(match, href) ? "bg-surface font-medium text-ink shadow-[var(--shadow-card)] ring-1 ring-line" : "text-muted hover:bg-surface-2 hover:text-ink",
             )}
           >
             <Icon className="size-[18px] shrink-0" aria-hidden />

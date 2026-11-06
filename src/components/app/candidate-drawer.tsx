@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ExternalLink } from "lucide-react";
-import { AvatarInitials, Badge, Button, ConfidenceDot, Drawer, ErrorState, Field, Input, Modal, Notice, ScoreBar, Select, Skeleton, Tabs, Textarea } from "@/components/ui/primitives";
+import { AvatarInitials, Badge, Button, ConfidenceDot, Drawer, ErrorState, Field, Input, Modal, Notice, Receipt, ScoreBar, ScoreRing, Select, Skeleton, Tabs, Textarea } from "@/components/ui/primitives";
 import { REJECT_REASONS } from "@/lib/stages";
 import { bandFor } from "@/lib/ai/score";
 
@@ -135,7 +135,7 @@ export function CandidateDrawer({ id, onClose, onChanged }: { id: string | null;
             <div className="flex items-start gap-4 pr-10">
               <AvatarInitials name={d.name} size={48} />
               <div className="min-w-0 flex-1">
-                <h2 className="display text-[26px] leading-8">{d.name}</h2>
+                <h2 className="display text-[28px]">{d.name}</h2>
                 <p className="text-sm text-muted">{d.profile.currentRole ?? "Role not found"}{d.profile.currentCompany && ` · ${d.profile.currentCompany}`}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <Badge tone={d.consentStatus === "GIVEN" ? "accent" : "warn"}>{d.consentStatus === "GIVEN" ? "Consent on record — hiring use only" : d.consentStatus === "WITHDRAWN" ? "Consent withdrawn" : "Consent pending"}</Badge>
@@ -143,9 +143,9 @@ export function CandidateDrawer({ id, onClose, onChanged }: { id: string | null;
                   {d.parseStatus === "NEEDS_REVIEW" && <Badge tone="warn">Needs review</Badge>}
                 </div>
               </div>
-              <div className="text-right">
-                <p className="display text-[40px] leading-10">{d.overallScore != null ? Math.round(d.overallScore) : "—"}</p>
-                <p className="text-xs text-muted">{d.overallScore != null ? bandFor(d.overallScore) : "Not scored"}</p>
+              <div className="flex flex-col items-center gap-1">
+                <ScoreRing score={d.overallScore} size={76} />
+                <p className="label">{d.overallScore != null ? bandFor(d.overallScore) : "Not scored"}</p>
               </div>
             </div>
             <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-1 text-[13px] sm:grid-cols-4">
@@ -213,7 +213,7 @@ export function CandidateDrawer({ id, onClose, onChanged }: { id: string | null;
                         <div className="flex items-center gap-4"><ScoreBar score={s.score} /><ConfidenceDot value={s.confidence} /></div>
                       </div>
                       {s.evidenceQuote ? (
-                        <blockquote className="mt-2 border-l-2 border-accent bg-accent-soft/50 px-3 py-2 text-[13px] italic">“{s.evidenceQuote}”</blockquote>
+                        <Receipt label="Verified in CV" className="mt-2.5">“{s.evidenceQuote}”</Receipt>
                       ) : s.type === "SKILL" || s.type === "CUSTOM" || !s.grounded ? (
                         <p className="mt-2 text-[13px] text-muted">{s.score > 0 || s.confidence === 0 ? "Could not verify a verbatim line. Open the CV to check." : "No supporting line found in the CV."}</p>
                       ) : null}

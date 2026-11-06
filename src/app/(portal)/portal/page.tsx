@@ -16,8 +16,8 @@ export default async function PortalHome() {
   });
   return (
     <>
-      <h1 className="display mb-1 text-[32px] leading-10">Your shortlists</h1>
-      <p className="mb-6 text-muted">Candidates shared with you by Meridian Talent.</p>
+      <h1 className="display rise mb-2 text-[34px] sm:text-[44px]">Your shortlists</h1>
+      <p className="mb-8 max-w-lg text-[15px] leading-6 text-muted">Candidates shared with you by Meridian Talent. Every score links back to a line in the CV.</p>
       {reqs.length === 0 ? (
         <EmptyState title="No shortlists yet." body="Your recruiter will share candidates here." />
       ) : (
@@ -27,10 +27,10 @@ export default async function PortalHome() {
             const last = r.applications.reduce((m, a) => (a.submittedAt && a.submittedAt > m ? a.submittedAt : m), r.createdAt);
             return (
               <li key={r.id}>
-                <Card className="p-5">
+                <Card className="p-6 t-fast hover:shadow-[var(--shadow-hover)]">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h2 className="display text-2xl leading-8">{r.title}</h2>
+                      <h2 className="display text-[24px] leading-8">{r.title}</h2>
                       <p className="text-sm text-muted">{r.location || "Location open"} · {r.minExpYears}–{r.maxExpYears} years</p>
                     </div>
                     {pending > 0 && <Badge tone="accent">{pending} new</Badge>}
