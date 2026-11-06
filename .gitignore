@@ -51,3 +51,4 @@ next-env.d.ts
 /.pgdata/
 .pgdata-log.txt
 AGENTS.md
+docs/TDD.pdf
