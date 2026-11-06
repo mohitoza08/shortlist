@@ -1,5 +1,5 @@
 /**
- * Sliding-window limiter for the provider's free-tier limits (master §9.8).
+ * Sliding-window limiter for the provider's free-tier limits.
  * In-memory: good for one server instance. Production needs a shared store (see TDD).
  */
 type Limits = { rpm: number; tpm: number; rpd: number; tpd: number };

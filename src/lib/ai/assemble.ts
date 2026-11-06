@@ -27,7 +27,7 @@ export type Assembled = {
 };
 
 /**
- * Combine model/heuristic extraction with deterministic scoring (master §9.3, §9.4, §9.7).
+ * Combine model/heuristic extraction with deterministic scoring.
  * Quotes are verified against the full resume text. If the model's quote is not verbatim we look for a real
  * line in the CV ourselves; if there is none, the criterion is marked ungrounded and gets no credit.
  */

@@ -29,7 +29,7 @@ export type DupCandidate = {
   skills?: string[];
 };
 
-/** Cheapest-first possible-duplicate check against another person (master §10 steps 3-4). */
+/** Cheapest-first possible-duplicate check against another person. */
 export function possibleDuplicate(a: DupCandidate, b: DupCandidate): "email" | "phone" | "name" | null {
   if (a.email && normEmail(a.email) === normEmail(b.email)) return "email";
   if (a.phone && normPhone(a.phone).length >= 8 && normPhone(a.phone) === normPhone(b.phone)) return "phone";

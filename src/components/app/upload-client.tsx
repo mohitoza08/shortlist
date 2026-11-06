@@ -32,7 +32,7 @@ export function UploadClient({ requisitionId, mustHaves }: { requisitionId: stri
 
   const patch = useCallback((key: string, p: Partial<Row>) => setRows((rs) => rs.map((r) => (r.key === key ? { ...r, ...p } : r))), []);
 
-  /** One CV at a time through the AI step (master §9.8). */
+  /** One CV at a time through the AI step. */
   const drain = useCallback(async () => {
     if (processing.current) return;
     processing.current = true;

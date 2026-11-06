@@ -15,7 +15,7 @@ export function isGrounded(quote: string | null | undefined, resumeText: string)
   return normalize(resumeText).includes(q);
 }
 
-/** Confidence after grounding checks (master §9.7). */
+/** Confidence after grounding checks. */
 export function adjustConfidence(opts: {
   raw: number;
   grounded: boolean;

@@ -265,7 +265,7 @@ Cut, in order of importance:
 
 **Routes.** `POST /api/requisitions`, `PATCH /api/requisitions/[id]`, `POST /api/scorecard/extract`, `POST|GET /api/requisitions/[id]/applications`, `GET /api/applications/[id]`, `POST /api/applications/[id]/{process,retry,view,submit,reject,stage,duplicate}`, `PATCH /api/applications/[id]/profile`, `GET /api/files/[applicationId]`, `POST /api/candidates/[id]/{consent,deletion-request,delete}`, `POST /api/portal/applications/[id]/{decision,viewed}`, `GET /api/audit`, `GET /api/metrics`. Errors use `{ error: { code, message, details? } }`.
 
-**Deviation from the master prompt:** JD extraction is `POST /api/scorecard/extract` because the requisition does not exist yet on the intake screen.
+**Design note:** JD extraction is `POST /api/scorecard/extract` because the requisition does not exist yet on the intake screen.
 
 **Environment names:** `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, `AUTH_URL`, `GROQ_API_KEY`, `GROQ_TEXT_MODEL`, `GROQ_VISION_MODEL`, `BLOB_READ_WRITE_TOKEN`, `NEXT_PUBLIC_APP_URL`, `SEED_DEMO_PASSWORD`, `AI_MOCK`.
 

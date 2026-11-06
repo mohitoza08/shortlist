@@ -1,5 +1,5 @@
 /**
- * Weekly AI-vs-recruiter sample (master §5 Fairness tab). Pure so it can be tested.
+ * Weekly AI-vs-recruiter sample. Pure so it can be tested.
  * AI top-10 = the ten highest overall scores. "Recruiter set" = candidates submitted to the client.
  */
 export type SampleApp = { id: string; score: number | null; submitted: boolean };

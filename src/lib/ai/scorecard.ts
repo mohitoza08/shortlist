@@ -1,7 +1,7 @@
 import type { CriterionInput, JdExtraction } from "./schema";
 import { defaultWeights, normaliseWeights } from "./score";
 
-/** Turn a JD extraction into editable criteria with default weights (master §9.3). */
+/** Turn a JD extraction into editable criteria with default weights. */
 export function criteriaFromExtraction(x: JdExtraction): CriterionInput[] {
   const w = defaultWeights(x.mustHaveSkills.length);
   const out: CriterionInput[] = x.mustHaveSkills.map((s, i) => ({
