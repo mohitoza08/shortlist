@@ -8,7 +8,7 @@ title: "Shortlist — Technical Design Document"
 
 | | |
 |---|---|
-| **GitHub** | Not published yet. The repository is local at `D:\job\shortlist` and ready to push. |
+| **GitHub** | https://github.com/mohitoza08/shortlist |
 | **Live URL** | Not deployed yet. Runs locally with `npm run build && npm run start`. See `deployment.md`. |
 | **Demo accounts** | `recruiter@meridian.example`, `hiring@ashfordbank.example`, `hiring@velaretail.example` · password `Demo1234!` |
 | **Date** | 3 November 2026 |

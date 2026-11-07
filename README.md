@@ -30,7 +30,7 @@ AI ranks and explains; people decide. Nobody is rejected automatically, and low 
 
 - The Groq model path is written but **has not been run against the live API**. Demo scores come from a labelled rule-based extractor.
 - Scanned CVs are flagged for review, not OCR'd.
-- Not deployed; no GitHub remote yet.
+- Not deployed yet.
 
 ## Quick start
 
