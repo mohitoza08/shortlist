@@ -170,7 +170,7 @@ export function RankedClient({ requisitionId, rows, noticeMax }: { requisitionId
         <EmptyState title="No candidates match these filters" action={<Button variant="secondary" onClick={() => { setQ(""); setMinScore(0); setNoticeLe(""); setConf(""); setStage(""); setShowLow(true); setDupOnly(false); setShowWithdrawn(false); }}>Clear filters</Button>} />
       ) : (
         <>
-          <Card className="hidden overflow-hidden lg:block">
+          <Card className="hidden overflow-x-auto lg:block">
             <table className="w-full text-left">
               <thead className="border-b border-line bg-surface-2/50">
                 <tr className="label">
@@ -203,7 +203,7 @@ export function RankedClient({ requisitionId, rows, noticeMax }: { requisitionId
                           <span className="block text-[15px] font-medium tracking-[-0.01em] group-hover:text-accent">{r.name}</span>
                           <span className="block text-[13px] text-muted">{r.role ?? "Role not found"}{r.years != null && ` · ${r.years} yrs`}</span>
                           {r.topQuote && (
-                            <span className="receipt mt-2 block max-w-[460px]" title={r.topQuote}>
+                            <span className="receipt mt-2 block max-w-[300px]" title={r.topQuote}>
                               <span className="mono block truncate text-[12px] leading-5 text-ink-2">“{r.topQuote}”</span>
                             </span>
                           )}

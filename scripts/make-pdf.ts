@@ -53,7 +53,7 @@ fs.writeFileSync(path.join(docs, "TDD.html"), unwrapped);
 fs.rmSync(body);
 
 (async () => {
-  const browser = await chromium.launch();
+  const browser = await chromium.launch(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL as "chrome" } : {});
   const page = await browser.newPage();
   await page.goto("file:///" + path.join(docs, "TDD.html").replace(/\\/g, "/"), { waitUntil: "networkidle" });
   await page.waitForSelector("body[data-ready='1']", { timeout: 20_000 }).catch(() => console.warn("Mermaid did not render; diagrams fall back to source."));
