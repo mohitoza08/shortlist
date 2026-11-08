@@ -12,7 +12,7 @@ Shortlist is a Next.js 16 app with Postgres. This file covers running it locally
 ## 2. Local setup
 
 ```bash
-git clone <repo-url> shortlist && cd shortlist
+git clone https://github.com/mohitoza08/shortlist.git && cd shortlist
 npm install
 cp .env.example .env        # then fill in the values below
 npx prisma migrate deploy   # creates the tables
@@ -33,7 +33,7 @@ AI_MOCK="1"                 # use the rule-based extractor; set to 0 and add GRO
 SEED_DEMO_PASSWORD="Demo1234!"
 ```
 
-To use Groq: set `GROQ_API_KEY`, `AI_MOCK="0"`, and optionally `GROQ_TEXT_MODEL` (default `openai/gpt-oss-20b`). **This path has not been run against the live API yet. Run `npm run seed:demo -- --reset` with a key and read a few scorecards before trusting it.**
+To use Groq: set `GROQ_API_KEY`, `AI_MOCK="0"`, and optionally `GROQ_TEXT_MODEL` (default `openai/gpt-oss-20b`). The live path was checked on 3 sample CVs (`npx tsx --env-file=.env scripts/live-ai-test.ts`, then `scripts/live-ai-report.ts` to see each score and whether every quote is a real line of the CV). With `AI_MOCK="1"`, `npm run seed:demo` scores the 33 seed CVs with the rule-based extractor (labelled `heuristic` in the UI and in `AiRun`); with a key and `AI_MOCK="0"` the scores come from the model.
 
 ## 3. Tests and checks
 
@@ -89,4 +89,4 @@ Password for all: `Demo1234!` (set from `SEED_DEMO_PASSWORD`; change it for anyt
 - `npm run seed:resumes` rewrites `prisma/seed-data/resumes/` (deterministic: same input, same files).
 - `npm run seed:demo -- --reset` wipes applications, candidates, AI runs, deletion requests and the audit log, then reloads everything through the real pipeline. With `GROQ_API_KEY` set and `AI_MOCK=0` the scores come from the model; otherwise from the rule-based extractor. Each `AiRun` row records which.
 - `npm run samples` regenerates the CVs offered by the "Try 3 sample CVs" button in `public/samples/`.
-- `npm run screenshots` retakes `docs/screenshots/` from a running app.
+- `npm run screenshots` retakes `docs/screenshots/` from a running app. `npm run pdf` rebuilds the TDD PDF (needs pandoc). If Playwright's own browser is not installed, run either with `PW_CHANNEL=chrome` to use the installed Chrome.

@@ -11,7 +11,7 @@ title: "Shortlist — Technical Design Document"
 | **GitHub** | https://github.com/mohitoza08/shortlist |
 | **Live URL** | Not deployed yet. Runs locally with `npm run build && npm run start`. See `deployment.md`. |
 | **Demo accounts** | `recruiter@meridian.example`, `hiring@ashfordbank.example`, `hiring@velaretail.example` · password `Demo1234!` |
-| **Date** | 3 November 2026 |
+| **Date** | 8 November 2026 |
 | **Author** | Mohit Oza |
 
 > **Read this first: what is and is not verified.** Everything below describes the code as built. Two limits to know:
@@ -190,9 +190,18 @@ Bands: 85 and above Strong, 65 to 84 Good, 40 to 64 Partial, below 40 Weak. Weak
 
 # 9. UI and design decisions
 
-Warm paper background, ink text and one evergreen accent. Instrument Serif for titles and the wordmark against Inter for dense UI; the contrast is the personality. No gradients, glass, emoji or stock imagery. Tokens live as CSS variables mapped into Tailwind (`globals.css`). Numbers are tabular. Focus is a 2 px accent ring. Motion is 160 ms and respects reduced motion.
+**Direction: quiet precision.** A recruiter spends hours in this tool, so the interface stays calm and lets the data lead. Tinted-neutral paper background, near-black ink and one evergreen accent. Geist for the interface, Geist Mono for numbers and quoted CV lines, Instrument Serif only for score numerals, the sign-in headline and empty states, so the serif always means "this is the thing to look at". Tokens are CSS variables mapped into Tailwind (`globals.css`).
 
-A score is never just a number: it shows a bar, a confidence dot and the line that earned it. The recruiter list is dense with one clear action per row; the client portal is airy with 44 px targets and one card per candidate. States are designed: skeletons, empty, error, queued and needs-review all have real copy.
+**Trust is the core UX problem.** The question a recruiter asks is "why should I believe this score?". So a score is never just a number: it is a ring with the number inside, a confidence label, and a **Verified in CV** receipt, the exact line from the CV that earned it. The same receipt appears in the ranked list, the candidate drawer and the client portal.
+
+**Psychology applied on purpose:**
+- *Hick's law:* the ranked list shows only search and sort; the other filters sit behind one Filters button with an active-count badge.
+- *Recognition over recall:* each person gets a stable avatar tint; stages have fixed colour dots on the board.
+- *Goal gradient:* the impact strip shows each metric against its target as a meter.
+- *Where am I:* upload and new-requisition screens show a three-step indicator (Scorecard, Upload CVs, Ranked list).
+- *Feedback:* uploads show per-file status and one batch progress bar; the entrance motion is staggered and is switched off for reduced-motion users.
+
+The recruiter list is dense with one clear action per row; the client portal is airy with 44 px targets and one card per candidate. States are designed: skeletons (`loading.tsx` in both areas), empty states with a next step, and error states with retry.
 
 Screens (see `docs/screenshots/`): login, requisitions with impact strip, new requisition, upload, ranked list, candidate drawer, pipeline, fairness and audit tab, portal list, portal review at 390 px. Mobile overflow is checked by an automated test.
 
@@ -243,9 +252,9 @@ The values on the demo screen come from the seeded dataset (timestamps backdated
 
 Cut, in order of importance:
 
-1. Groq verification with a real key (highest priority; the path is written and unit-tested at its edges but unrun).
+1. Wider Groq verification. The live path was run on 3 sample CVs (valid JSON after a tolerant number parser, 0 ungrounded quotes, injection CV scored 22.4). It was not run over all 33 seed CVs or compared against a labelled set.
 2. OCR for scanned CVs through a vision model (A2).
-3. GitHub publication and Vercel deployment.
+3. Vercel deployment (the code is on GitHub; the app runs locally, see `deployment.md`).
 4. Background processing, so a recruiter can close the tab (A9).
 5. Sticky mobile action bar in the portal.
 6. In-app notifications (A7), delivery-head login (A6).
@@ -258,7 +267,6 @@ Cut, in order of importance:
 - 500 CVs cannot be scored in a day on the free tier (section 7).
 - The rule-based extractor misses paraphrase: a CV that says "payment APIs" will not match "REST APIs". This is a limit of the fallback, not of the design.
 - The limiter is per server instance.
-- `.pgdata` was committed once by mistake and removed in the next commit; it still exists in git history (about 13 MB). Rewrite history before publishing.
 - Tab close pauses processing.
 
 # 15. Appendix

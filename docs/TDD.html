@@ -26,7 +26,7 @@ client shortlist portal for a staffing firm.</p>
 <tbody>
 <tr>
 <td><strong>GitHub</strong></td>
-<td><a href="https://github.com/mohitoza08/shortlist">https://github.com/mohitoza08/shortlist</a></td>
+<td>https://github.com/mohitoza08/shortlist</td>
 </tr>
 <tr>
 <td><strong>Live URL</strong></td>
@@ -43,7 +43,7 @@ client shortlist portal for a staffing firm.</p>
 </tr>
 <tr>
 <td><strong>Date</strong></td>
-<td>3 November 2026</td>
+<td>8 November 2026</td>
 </tr>
 <tr>
 <td><strong>Author</strong></td>
@@ -53,12 +53,13 @@ client shortlist portal for a staffing firm.</p>
 </table>
 <blockquote>
 <p><strong>Read this first: what is and is not verified.</strong>
-Everything below describes the code as built. Two things were
-<em>not</em> exercised: (1) the live Groq model path has never been
-called, because no API key was available. All demo scores in this build
-come from the rule-based extractor, which is labelled as such in the UI
-and in <code>AiRun</code> rows. (2) there is no production deployment.
-Section 13 lists every cut.</p>
+Everything below describes the code as built. Two limits to know: (1)
+the live Groq path was checked on 3 sample CVs only (scores, JSON
+validity, 0 ungrounded quotes, injection CV scored low). It was not run
+over all 33 seed CVs; the seeded demo scores come from the rule-based
+extractor, which is labelled as such in the UI and in <code>AiRun</code>
+rows. (2) there is no production deployment yet. Section 13 lists every
+cut.</p>
 </blockquote>
 <h1 id="problem-and-constraints">1. Problem and constraints</h1>
 <p>Company A (Noida) recruits for IT services, banking back-office and
@@ -480,17 +481,35 @@ three skills quoted from experience bullets) scores 96.9. Pooja Nair
 microservices) scores 37. The hidden attributes in both CVs (date of
 birth, gender, marital status) never reach scoring.</p>
 <h1 id="ui-and-design-decisions">9. UI and design decisions</h1>
-<p>Warm paper background, ink text and one evergreen accent. Instrument
-Serif for titles and the wordmark against Inter for dense UI; the
-contrast is the personality. No gradients, glass, emoji or stock
-imagery. Tokens live as CSS variables mapped into Tailwind
-(<code>globals.css</code>). Numbers are tabular. Focus is a 2 px accent
-ring. Motion is 160 ms and respects reduced motion.</p>
-<p>A score is never just a number: it shows a bar, a confidence dot and
-the line that earned it. The recruiter list is dense with one clear
-action per row; the client portal is airy with 44 px targets and one
-card per candidate. States are designed: skeletons, empty, error, queued
-and needs-review all have real copy.</p>
+<p><strong>Direction: quiet precision.</strong> A recruiter spends hours
+in this tool, so the interface stays calm and lets the data lead.
+Tinted-neutral paper background, near-black ink and one evergreen
+accent. Geist for the interface, Geist Mono for numbers and quoted CV
+lines, Instrument Serif only for score numerals, the sign-in headline
+and empty states, so the serif always means “this is the thing to look
+at”. Tokens are CSS variables mapped into Tailwind
+(<code>globals.css</code>).</p>
+<p><strong>Trust is the core UX problem.</strong> The question a
+recruiter asks is “why should I believe this score?”. So a score is
+never just a number: it is a ring with the number inside, a confidence
+label, and a <strong>Verified in CV</strong> receipt, the exact line
+from the CV that earned it. The same receipt appears in the ranked list,
+the candidate drawer and the client portal.</p>
+<p><strong>Psychology applied on purpose:</strong> - <em>Hick’s
+law:</em> the ranked list shows only search and sort; the other filters
+sit behind one Filters button with an active-count badge. -
+<em>Recognition over recall:</em> each person gets a stable avatar tint;
+stages have fixed colour dots on the board. - <em>Goal gradient:</em>
+the impact strip shows each metric against its target as a meter. -
+<em>Where am I:</em> upload and new-requisition screens show a
+three-step indicator (Scorecard, Upload CVs, Ranked list). -
+<em>Feedback:</em> uploads show per-file status and one batch progress
+bar; the entrance motion is staggered and is switched off for
+reduced-motion users.</p>
+<p>The recruiter list is dense with one clear action per row; the client
+portal is airy with 44 px targets and one card per candidate. States are
+designed: skeletons (<code>loading.tsx</code> in both areas), empty
+states with a next step, and error states with retry.</p>
 <p>Screens (see <code>docs/screenshots/</code>): login, requisitions
 with impact strip, new requisition, upload, ranked list, candidate
 drawer, pipeline, fairness and audit tab, portal list, portal review at
@@ -643,10 +662,13 @@ evidence of real-world impact.</p>
 next</h1>
 <p>Cut, in order of importance:</p>
 <ol type="1">
-<li>Groq verification with a real key (highest priority; the path is
-written and unit-tested at its edges but unrun).</li>
+<li>Wider Groq verification. The live path was run on 3 sample CVs
+(valid JSON after a tolerant number parser, 0 ungrounded quotes,
+injection CV scored 22.4). It was not run over all 33 seed CVs or
+compared against a labelled set.</li>
 <li>OCR for scanned CVs through a vision model (A2).</li>
-<li>GitHub publication and Vercel deployment.</li>
+<li>Vercel deployment (the code is on GitHub; the app runs locally, see
+<code>deployment.md</code>).</li>
 <li>Background processing, so a recruiter can close the tab (A9).</li>
 <li>Sticky mobile action bar in the portal.</li>
 <li>In-app notifications (A7), delivery-head login (A6).</li>
@@ -662,9 +684,6 @@ appear as Needs review.</li>
 APIs” will not match “REST APIs”. This is a limit of the fallback, not
 of the design.</li>
 <li>The limiter is per server instance.</li>
-<li><code>.pgdata</code> was committed once by mistake and removed in
-the next commit; it still exists in git history (about 13 MB). Rewrite
-history before publishing.</li>
 <li>Tab close pauses processing.</li>
 </ul>
 <h1 id="appendix">15. Appendix</h1>
