@@ -1,0 +1,31 @@
+name: Seed database
+
+# Manual only. Creates the tables and loads the demo users and the 33 sample CVs into the database
+# named by the repository secrets DATABASE_URL and DIRECT_URL (for example a Neon project).
+# It never wipes existing data: run it once on a fresh database.
+on:
+  workflow_dispatch:
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      SEED_DEMO_PASSWORD: Demo1234!
+      AI_MOCK: "1"
+      AUTH_SECRET: not-used-by-the-seed
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Create tables
+        run: npx prisma migrate deploy
+      - name: Users, clients and requisitions
+        run: npx prisma db seed
+      - name: Load the sample CVs through the real pipeline
+        run: npm run seed:demo
