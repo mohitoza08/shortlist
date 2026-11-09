@@ -16,7 +16,7 @@ title: "Shortlist — Technical Design Document"
 
 > **Read this first: what is and is not verified.** Everything below describes the code as built. Two limits to know:
 > (1) the live Groq path was checked on 3 sample CVs only (scores, JSON validity, 0 ungrounded quotes, injection CV scored low). It was not run over all 33 seed CVs; the seeded demo scores come from the rule-based extractor, which is labelled as such in the UI and in `AiRun` rows.
-> (2) the hosted app on Vercel was checked from outside only (pages, redirects, 401s on every API route without a session); the full recruiter-to-client flow was exercised locally and in the e2e test. Section 13 lists every cut.
+> (2) on the hosted Vercel app I confirmed sign-in, the ranked list and the candidate scorecard with live Groq scoring (sample CVs scored 97, 31 and 22, quotes are CV lines), plus redirects and 401s on every API route without a session. The full recruiter-to-client flow was exercised locally and in the e2e test. Section 13 lists every cut.
 
 # 1. Problem and constraints
 
