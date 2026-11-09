@@ -1,6 +1,6 @@
 # Deployment and local setup
 
-Shortlist is a Next.js 16 app with Postgres. This file covers running it locally and the intended deployment. **It has not been deployed yet**; the Vercel steps below are the plan, not a record of something done.
+Shortlist is a Next.js 16 app with Postgres. This file covers running it locally and how the hosted copy was set up. It is deployed at **https://shortlist-six-ecru.vercel.app** (Vercel, with Neon Postgres). Section 4 describes how.
 
 ## 1. Prerequisites
 
@@ -49,7 +49,7 @@ node scripts/smoke.mjs  # 49 HTTP checks against the running server
 
 Run e2e and smoke tests with `AI_MOCK=1` so results are deterministic. They create new requisitions with "Smoke" or "E2E" in the title; `npm run seed:demo -- --reset` removes smoke data.
 
-## 4. Deploying (planned)
+## 4. How it is deployed
 
 1. **Neon:** create a project and database. Copy the pooled connection string to `DATABASE_URL` and the direct one to `DIRECT_URL`.
 2. **Vercel:** import the repository. Framework preset Next.js. Set the environment variables below. Build command `prisma migrate deploy && next build`.

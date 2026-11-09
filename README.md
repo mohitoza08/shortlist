@@ -8,7 +8,7 @@ A recruiter pastes a job description and gets an editable scorecard. They upload
 
 | | |
 |---|---|
-| Demo | Not deployed yet. See [deployment.md](deployment.md) to run it locally. |
+| Demo | https://shortlist-six-ecru.vercel.app/login (demo logins in [deployment.md](deployment.md)) |
 | Design doc | [docs/TDD.md](docs/TDD.md) (PDF: `docs/TDD.pdf`) |
 | Honest status | TDD sections 3 (assumptions) and 13 (cuts and known limits) |
 
@@ -30,7 +30,7 @@ AI ranks and explains; people decide. Nobody is rejected automatically, and low 
 
 - The Groq model path is written but **has not been run against the live API**. Demo scores come from a labelled rule-based extractor.
 - Scanned CVs are flagged for review, not OCR'd.
-- Not deployed yet.
+- Hosted on Vercel with Neon Postgres. Free tiers: the first request after idle can be slow.
 
 ## Quick start
 

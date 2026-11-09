@@ -9,14 +9,14 @@ title: "Shortlist — Technical Design Document"
 | | |
 |---|---|
 | **GitHub** | https://github.com/mohitoza08/shortlist |
-| **Live URL** | Not deployed yet. Runs locally with `npm run build && npm run start`. See `deployment.md`. |
+| **Live URL** | https://shortlist-six-ecru.vercel.app (Vercel + Neon Postgres). Also runs locally, see `deployment.md`. |
 | **Demo accounts** | `recruiter@meridian.example`, `hiring@ashfordbank.example`, `hiring@velaretail.example` · password `Demo1234!` |
 | **Date** | 8 November 2026 |
 | **Author** | Mohit Oza |
 
 > **Read this first: what is and is not verified.** Everything below describes the code as built. Two limits to know:
 > (1) the live Groq path was checked on 3 sample CVs only (scores, JSON validity, 0 ungrounded quotes, injection CV scored low). It was not run over all 33 seed CVs; the seeded demo scores come from the rule-based extractor, which is labelled as such in the UI and in `AiRun` rows.
-> (2) there is no production deployment yet. Section 13 lists every cut.
+> (2) the hosted app on Vercel was checked from outside only (pages, redirects, 401s on every API route without a session); the full recruiter-to-client flow was exercised locally and in the e2e test. Section 13 lists every cut.
 
 # 1. Problem and constraints
 
@@ -254,7 +254,7 @@ Cut, in order of importance:
 
 1. Wider Groq verification. The live path was run on 3 sample CVs (valid JSON after a tolerant number parser, 0 ungrounded quotes, injection CV scored 22.4). It was not run over all 33 seed CVs or compared against a labelled set.
 2. OCR for scanned CVs through a vision model (A2).
-3. Vercel deployment (the code is on GitHub; the app runs locally, see `deployment.md`).
+3. Security response headers (CSP, frame and content-type options) on the hosted app; only Vercel's HSTS is set today.
 4. Background processing, so a recruiter can close the tab (A9).
 5. Sticky mobile action bar in the portal.
 6. In-app notifications (A7), delivery-head login (A6).

@@ -30,9 +30,8 @@ client shortlist portal for a staffing firm.</p>
 </tr>
 <tr>
 <td><strong>Live URL</strong></td>
-<td>Not deployed yet. Runs locally with
-<code>npm run build &amp;&amp; npm run start</code>. See
-<code>deployment.md</code>.</td>
+<td>https://shortlist-six-ecru.vercel.app (Vercel + Neon Postgres). Also
+runs locally, see <code>deployment.md</code>.</td>
 </tr>
 <tr>
 <td><strong>Demo accounts</strong></td>
@@ -58,8 +57,10 @@ the live Groq path was checked on 3 sample CVs only (scores, JSON
 validity, 0 ungrounded quotes, injection CV scored low). It was not run
 over all 33 seed CVs; the seeded demo scores come from the rule-based
 extractor, which is labelled as such in the UI and in <code>AiRun</code>
-rows. (2) there is no production deployment yet. Section 13 lists every
-cut.</p>
+rows. (2) the hosted app on Vercel was checked from outside only (pages,
+redirects, 401s on every API route without a session); the full
+recruiter-to-client flow was exercised locally and in the e2e test.
+Section 13 lists every cut.</p>
 </blockquote>
 <h1 id="problem-and-constraints">1. Problem and constraints</h1>
 <p>Company A (Noida) recruits for IT services, banking back-office and
@@ -667,8 +668,8 @@ next</h1>
 injection CV scored 22.4). It was not run over all 33 seed CVs or
 compared against a labelled set.</li>
 <li>OCR for scanned CVs through a vision model (A2).</li>
-<li>Vercel deployment (the code is on GitHub; the app runs locally, see
-<code>deployment.md</code>).</li>
+<li>Security response headers (CSP, frame and content-type options) on
+the hosted app; only Vercel’s HSTS is set today.</li>
 <li>Background processing, so a recruiter can close the tab (A9).</li>
 <li>Sticky mobile action bar in the portal.</li>
 <li>In-app notifications (A7), delivery-head login (A6).</li>

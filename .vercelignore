@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.vercel
+.pgdata
+.pgdata_tmp
+.pgdata-log.txt
+test-results
+playwright-report
+coverage
+.env
+.env*.local
+*.log
+tsconfig.tsbuildinfo
+docs/TDD.pdf
+AGENTS.md

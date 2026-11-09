@@ -54,3 +54,6 @@ AGENTS.md
 docs/TDD.pdf
 
 !.env.example
+
+.vercel
+.env*.local
